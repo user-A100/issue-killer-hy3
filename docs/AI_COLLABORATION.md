@@ -43,4 +43,4 @@ powershell -ExecutionPolicy Bypass -File scripts/run-codebuddy-review.ps1
 - [x] 审查发现的高危与中危问题已修复并重新复核。
 - [x] `npm run lint` 和 `npm test` 通过。
 - [x] 两个真实 Demo 已重新运行，结果中没有密钥。
-- [x] 演示 GIF 约 18 秒，不超过 2 分钟。
+- [x] 真人录制演示视频为 1 分 45 秒，不超过 2 分钟；API Key 始终遮挡。

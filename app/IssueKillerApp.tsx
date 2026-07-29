@@ -72,7 +72,7 @@ const SAMPLE_ANALYSIS: IssueAnalysis = {
       title: "固化评测与交付",
       detail:
         "运行两个差异化 Issue，检查结果完整性，生成演示材料、README 和 PR 提交说明。",
-      verification: "评测报告、演示 GIF、开源文档和构建测试全部存在。",
+      verification: "评测报告、真人演示视频、开源文档和构建测试全部存在。",
     },
   ],
   risks: [

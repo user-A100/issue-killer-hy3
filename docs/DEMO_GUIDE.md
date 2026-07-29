@@ -1,6 +1,6 @@
 # 两个端到端 Demo
 
-演示目标时长约 20–35 秒，最长不得超过 2 分钟。
+演示视频时长为 1 分 45 秒，最长不得超过 2 分钟。
 
 ## 录制前
 
@@ -16,18 +16,18 @@
 4. 快速展示四阶段进度：FETCH → GROUND → PLAN → VERIFY。
 5. 展示实时报告中的验收标准、实施计划和证据来源。
 
-## Flow 02：工程型 Issue
+## Flow 02：CubeSandbox 工程型 Issue
 
-1. 点击“Demo 02 · VulnGym 功能 Issue”。
-2. 确认输入框为 `https://github.com/Tencent/VulnGym/issues/5`。
+1. 输入 `https://github.com/TencentCloud/CubeSandbox/issues/645`。
+2. 确认页面仍保持 Hy3 API Key 遮挡。
 3. 再次生成。
-4. 展示报告对整数/区间行号、跨文件调用链、保守/修复模式和日志字段的覆盖。
+4. 展示报告中的任务摘要、验收标准、实施计划和真实代码入口。
 5. 点击“下载报告”，展示结果可被直接用于开工记录。
 
 ## 隐私检查
 
-- GIF 中 API Key 始终显示为圆点。
+- 视频中 API Key 始终显示为圆点。
 - 浏览器地址栏、终端与配置文件中不出现 Key。
 - 只展示公开 GitHub 内容和脱敏后的 Hy3 输出。
 
-生成后的 GIF 放在 `docs/demo/issue-killer-demo.gif`，并在 README 首屏引用。
+真人录制视频保存在 `docs/demo/issue-killer-demo.mp4`，并在 README 首屏链接。

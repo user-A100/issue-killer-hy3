@@ -6,9 +6,11 @@ Issue-killer 是为 [2026 腾讯犀牛鸟开源人才培养计划 · Hy3 Issue #
 
 ![Issue-killer 项目封面](public/og.png)
 
-### 18 秒端到端演示
+### 1 分 45 秒真人演示视频
 
-![Issue-killer 双流程演示](docs/demo/issue-killer-demo.gif)
+[▶ 查看 Issue-killer 真人录制演示](docs/demo/issue-killer-demo.mp4)
+
+视频展示 `Tencent-Hunyuan/Hy3 #4` 与 `TencentCloud/CubeSandbox #645` 两个真实 Issue 的本地操作和 Hy3 报告；自动评测仍使用下文的 Hy3 与 VulnGym 固定案例。
 
 ## Hy3 在系统中的角色
 
@@ -29,7 +31,7 @@ model: hy3
 | 全程通过 API 调用 Hy3 | 服务端调用 Hy3 Chat Completions；无训练、微调和本地模型 | `lib/hy3.ts` |
 | 至少一个交互前端 | 可输入 Issue URL 和个人 API Key 的响应式 Web 应用 | `app/IssueKillerApp.tsx` |
 | 至少两个端到端 Demo | Hy3 #4（产品型）与 VulnGym #5（工程型） | `evals/results/`、`evals/report.md` |
-| 不超过 2 分钟的视频或 GIF | 约 20 秒的双流程演示 GIF | `docs/demo/issue-killer-demo.gif` |
+| 不超过 2 分钟的视频或 GIF | 1 分 45 秒真人录制 MP4，覆盖两个真实 Issue 流程 | [`docs/demo/issue-killer-demo.mp4`](docs/demo/issue-killer-demo.mp4) |
 | 项目开源 | MIT License、完整运行文档与贡献指南 | `LICENSE`、`CONTRIBUTING.md` |
 | README 说明 Hy3 角色 | 见上文与架构文档 | `docs/ARCHITECTURE.md` |
 | 记录 AI 编程协作 | 按模块记录协作内容和人工验证 | `docs/AI_COLLABORATION.md` |
