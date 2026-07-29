@@ -76,6 +76,7 @@ npm run dev
 | `HY3_API_KEY` | 否 | 服务端共享 Hy3 Key；不配置时使用 BYOK |
 | `HY3_BASE_URL` | 否 | 默认 `https://tokenhub-intl.tencentcloudmaas.com/v1` |
 | `HY3_MODEL` | 否 | 默认 `hy3` |
+| `HY3_TIMEOUT_MS` | 否 | Hy3 请求超时，默认 `90000` 毫秒，可配置范围为 10–180 秒 |
 | `GITHUB_TOKEN` | 否 | 提高 GitHub REST API 限额；只需要只读权限 |
 
 ## 两个 Demo

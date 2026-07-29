@@ -24,7 +24,7 @@
     {
       "name": "risks 数量",
       "pass": true,
-      "detail": "2 / 最少 1"
+      "detail": "3 / 最少 1"
     },
     {
       "name": "testPlan 数量",
@@ -60,90 +60,95 @@
       ],
       "url": "https://github.com/Tencent-Hunyuan/Hy3/issues/4"
     },
-    "summary": "该 Issue 为腾讯犀牛鸟 2026 开源活动专属任务，要求参与者基于 Hy3 模型 API（通过 CodeBuddy/WorkBuddy 调用，禁止训练或本地部署）自由选题，构建一个端到端可运行的应用，展示 Hy3 在具体场景的能力。需基于 rhinobird2026 分支提交 PR 或独立仓库链接，应用至少含 1 个可交互前端（Web/CLI/IDE），跑通 2 个端到端 demo 并附≤2分钟视频或 GIF，README 写明 Hy3 角色并鼓励记录 CodeBuddy 协作代码。仓库根目录仅含 README 等基础文件，无具体 API 文档或应用模板。",
+    "summary": "该 Issue 为腾讯犀牛鸟 2026 开源活动专属任务，要求参与者基于 Hy3 模型 API，使用 CodeBuddy/WorkBuddy 自由选题构建一个端到端可运行的应用，展示 Hy3 在具体场景下的能力。需基于 rhinobird2026 分支开发并提交 PR，若独立仓库则在 PR 中补充说明与链接。要求全程通过 API 调用 Hy3（禁止训练/微调/本地推理），至少 1 个可交互前端，跑通 2 个端到端 demo 并附视频/GIF，README 写明 Hy3 角色及协作记录。仓库根目录仅含 README 等基础文件，无具体 API 文档或应用模板。",
     "difficulty": {
       "level": "中",
-      "rationale": "Issue 给出明确产出要求与参考方向，但选题自由、无既有代码约束；需自行设计应用并集成外部 API，对中高难度开发能力有要求，但无底层模型改动负担。"
+      "rationale": "Issue 给出明确产出要求与参考方向，但选题自由、无既有代码约束；需自行设计应用并集成 Hy3 API，涉及前端与端到端流程，对中高难度开发者可行，故判为中。"
     },
     "acceptanceCriteria": [
       "向 rhinobird2026 分支提交 PR 或在 PR 中提供独立应用仓库链接与说明",
-      "应用全程通过 Hy3 API 调用，无训练/微调/本地推理部署",
-      "应用至少包含 1 个可交互前端（Web/CLI/IDE 插件）",
-      "至少跑通 2 个端到端 demo 流程，并附≤2分钟视频或 GIF",
-      "项目开源且 README 写明 Hy3 在系统中承担的角色",
-      "README 鼓励记录由 CodeBuddy 协作完成的代码块（非强制但建议）"
+      "应用全程通过 Hy3 API 调用（非训练/微调/本地部署），README 明确 Hy3 承担角色",
+      "至少存在 1 个可交互前端（Web/CLI/IDE 插件）",
+      "至少跑通 2 个端到端 demo 流程，并附 ≤2 分钟视频或 GIF",
+      "项目开源且 README 记录哪些代码块由 CodeBuddy 协作完成",
+      "PR 或仓库说明符合 Issue 中犀牛鸟活动认领与报名要求"
     ],
     "entryPoints": [
       {
         "path": "README.md",
-        "why": "查阅 Hy3 模型介绍、API 调用示例（OpenAI 兼容）与部署方式，明确 API 接入基础"
+        "why": "阅读以确认 Hy3 的 API 调用方式、部署说明及模型能力边界，作为应用集成依据"
       },
       {
         "path": "README_CN.md",
-        "why": "获取中文版模型说明与 Quickstart，辅助理解 API 使用前提"
+        "why": "阅读中文版说明，确认与英文 README 一致的快速入门与 API 示例"
       }
     ],
     "implementationPlan": [
       {
         "title": "选题与方案设计",
-        "detail": "从 Issue 参考方向或自拟场景中选定应用主题，明确 Hy3 承担角色与前端形态",
-        "verification": "输出设计方案文档，说明场景、前端类型、Hy3 API 调用点"
+        "detail": "从 Issue 参考方向中选定具体场景（如多文档 RAG 问答），明确前端形态与 Hy3 API 调用点",
+        "verification": "输出设计方案文档，含场景、前端类型、2 个 demo 流程描述"
       },
       {
-        "title": "搭建前端与 API 集成",
-        "detail": "实现至少 1 个可交互前端，并通过 OpenAI 兼容客户端调用 Hy3 API（base_url 待活动分支或平台确认）",
+        "title": "搭建应用骨架与前端",
+        "detail": "创建应用项目，实现至少 1 个可交互前端，并接入 Hy3 OpenAI 兼容 API",
         "verification": "前端可启动并发送请求至 Hy3 API 返回结果"
       },
       {
         "title": "实现端到端流程",
-        "detail": "完成 2 个核心 demo 流程代码与交互逻辑",
-        "verification": "本地跑通 2 个流程且无报错"
+        "detail": "完成 2 个端到端 demo 功能，确保全程 API 调用 Hy3",
+        "verification": "本地跑通 2 个 demo，记录操作步骤"
       },
       {
         "title": "录制与文档",
-        "detail": "录制≤2分钟 demo 视频/GIF，编写 README 说明 Hy3 角色与 CodeBuddy 协作记录",
-        "verification": "视频/GIF 存在，README 含要求字段"
+        "detail": "录制 ≤2min 视频/GIF，编写 README 说明 Hy3 角色与 CodeBuddy 协作块",
+        "verification": "视频/GIF 存在，README 含要求章节"
       },
       {
         "title": "提交 PR",
-        "detail": "基于 rhinobird2026 分支提交 PR 或附仓库链接",
+        "detail": "基于 rhinobird2026 分支提交 PR 或独立仓库链接",
         "verification": "PR 创建成功且指向目标分支"
       }
     ],
     "risks": [
       {
         "level": "中",
-        "risk": "Hy3 API 访问地址与鉴权方式未在仓库根目录证据中给出",
-        "mitigation": "向维护者确认活动专用 API endpoint 与 key 获取方式"
+        "risk": "Hy3 API 访问权限或配额不足导致无法稳定调用",
+        "mitigation": "提前确认活动提供的 API 入口与 key，做异常处理"
       },
       {
         "level": "低",
-        "risk": "独立仓库与 PR 说明格式不清晰导致验收失败",
-        "mitigation": "严格按 Issue 要求补充项目说明与链接"
+        "risk": "选题过于宽泛致交付不完整",
+        "mitigation": "限定最小可用范围，优先完成 2 个 demo"
+      },
+      {
+        "level": "中",
+        "risk": "未满足犀牛鸟报名/认领时效要求",
+        "mitigation": "核对问卷与评论认领时间，确认资格有效"
       }
     ],
     "questions": [
-      "活动专用 Hy3 API 的 base_url 与 api_key 如何获取？是否使用 README 中的本地部署地址？",
-      " rhinobird2026 分支是否包含应用脚手架或示例？",
-      "独立应用仓库是否在 PR 中直接贴链接即可，还是需 submodule？",
-      "demo 视频/GIF 提交到 PR 的哪个路径或外链平台？"
+      "活动是否提供专用的 Hy3 API 端点与鉴权方式，还是使用自部署 vLLM/SGLang？",
+      "独立应用仓库是否必须纳入 Tencent-Hunyuan/Hy3 的 rhinobird2026 分支子目录，或仅 PR 说明即可？",
+      "CodeBuddy/WorkBuddy 是否为强制工具，还是其他 AI 编码助手也可记录协作？",
+      "demo 视频/GIF 应上传至何处（PR 附件、外链、仓库 assets）？"
     ],
     "testPlan": [
       {
-        "scenario": "正常流程：前端输入合法请求并调用 Hy3 API",
-        "expected": "返回合理内容并渲染至前端界面"
+        "scenario": "正常流程：用户通过前端输入查询，应用调用 Hy3 API 返回结果",
+        "expected": "前端展示 Hy3 生成内容，无报错，demo1 跑通"
       },
       {
-        "scenario": "边界条件：输入超长文本或空输入",
-        "expected": "前端给出提示或模型按约束处理不崩溃"
+        "scenario": "正常流程：第二个端到端 demo 执行（如文档上传后问答）",
+        "expected": "应用处理输入并调用 Hy3 输出，demo2 跑通"
       },
       {
-        "scenario": "失败路径：Hy3 API 不可达或返回错误",
-        "expected": "前端捕获异常并展示错误信息，不静默失败"
+        "scenario": "边界条件：Hy3 API 返回空或超长上下文",
+        "expected": "前端给出友好提示或截断处理，不崩溃"
       },
       {
-        "scenario": "端到端 demo 2 执行",
-        "expected": "第二个流程跑通且视频/GIF 可复现"
+        "scenario": "失败路径：Hy3 API 不可达或鉴权失败",
+        "expected": "应用捕获异常并提示错误，不出现未处理中断"
       }
     ],
     "sources": [
@@ -165,12 +170,12 @@
     ],
     "meta": {
       "model": "hy3",
-      "elapsedMs": 18918,
+      "elapsedMs": 21329,
       "promptTokens": 3893,
-      "completionTokens": 1055,
-      "generatedAt": "2026-07-29T07:28:55.617Z"
+      "completionTokens": 1162,
+      "generatedAt": "2026-07-29T08:06:32.561Z"
     }
   },
-  "evaluatedAt": "2026-07-29T07:28:55.623Z",
-  "wallTimeMs": 19028
+  "evaluatedAt": "2026-07-29T08:06:32.567Z",
+  "wallTimeMs": 21382
 }

@@ -204,6 +204,18 @@ function sanitizeUpstreamMessage(message: string, apiKey: string): string {
     .replace(/authorization\s*[:=]\s*[^\s,;]+/gi, "Authorization: [已脱敏]");
 }
 
+function hy3TimeoutMs(): number {
+  const configured = Number(process.env.HY3_TIMEOUT_MS);
+  if (
+    Number.isInteger(configured) &&
+    configured >= 10_000 &&
+    configured <= 180_000
+  ) {
+    return configured;
+  }
+  return 90_000;
+}
+
 function buildPrompt(
   parsed: ParsedGitHubUrl,
   context: RepositoryContext,
@@ -288,7 +300,8 @@ export async function analyzeWithHy3(options: {
   const model = process.env.HY3_MODEL || "hy3";
   const prompt = buildPrompt(options.parsed, options.context);
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 30_000);
+  const timeoutMs = hy3TimeoutMs();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     const response = await fetch(`${baseUrl}/chat/completions`, {
@@ -344,7 +357,9 @@ export async function analyzeWithHy3(options: {
     };
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
-      throw new Error("Hy3 分析超时，请稍后重试。");
+      throw new Error(
+        `Hy3 分析超过 ${Math.round(timeoutMs / 1_000)} 秒，请稍后重试或提高 HY3_TIMEOUT_MS。`,
+      );
     }
     throw error;
   } finally {

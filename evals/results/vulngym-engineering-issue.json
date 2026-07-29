@@ -60,98 +60,98 @@
       ],
       "url": "https://github.com/Tencent/VulnGym/issues/5"
     },
-    "summary": "本任务要求为 Tencent/VulnGym 编写 Python 脚本，读取 data/entries.jsonl，检测并清理 trace 调用链中的重复节点与同一文件内顺序异常（节点行号早于 entry_point 或晚于 critical_operation）。需支持整数与 'start-end' 行号格式，跨文件保留原序，提供保守/修复双模式，输出修复后 JSONL、修改日志 CSV/JSON、异常统计报告及 README。优先覆盖 entry-00103 等 verify=0 样本。验收强调可验证扫描、格式兼容、跨文件不误排及日志完整。",
+    "summary": "本任务要求为 Tencent/VulnGym 编写 Python 脚本，读取 data/entries.jsonl，检测并清理 trace 调用链中的重复节点与同一文件内顺序异常（节点行号早于 entry_point 或晚于 critical_operation）。需支持整数与 'start-end' 行号格式，跨文件保留原序，提供保守/修复双模式，输出修复后 JSONL、修改日志 CSV/JSON、异常统计报告及 README。优先覆盖 issue 列举的 verify=0 样本。验收强调可验证扫描、格式兼容、跨文件不误排、日志完整与 SCHEMA 合规。",
     "difficulty": {
       "level": "低",
-      "rationale": "Issue 标签为犀牛鸟-低难度；任务边界清晰，仅需编写独立脚本读取已知 data/entries.jsonl 并按明确规则处理，无复杂架构改动或跨模块依赖。"
+      "rationale": "Issue 标签为犀牛鸟-低难度；任务边界清晰，输入数据路径与格式在 README/SCHEMA 有说明，无复杂算法或跨系统改动，交付物明确。"
     },
     "acceptanceCriteria": [
-      "脚本能完整扫描 data/entries.jsonl 并输出结构异常报告，统计重复节点、顺序异常、自动修复、保留人工复核数量",
+      "脚本能完整扫描 data/entries.jsonl 并输出结构异常报告，统计重复节点、顺序异常、自动修复、人工复核数量",
       "脚本能正确解析 line 为整数及 'start-end' 字符串两种格式并参与比较",
       "对同一文件内 line 小于 entry_point.line 或大于 critical_operation.line 的 trace 节点能稳定检测",
-      "跨文件 trace 节点不参与行号排序，仅记录原始顺序",
-      "所有修改日志包含 entry_id、字段路径、修改前后内容和修改原因",
-      "修复后 entries.trace_fixed.jsonl 满足 SCHEMA.md 基础约束（可由该文件校验）"
+      "跨文件 trace 节点不按行号重排，仅记录为跨文件不参与比较",
+      "所有修改日志包含 entry_id、字段路径、修改前后内容与修改原因",
+      "修复后 entries.trace_fixed.jsonl 满足 SCHEMA.md 基础约束，可用 json.loads 逐行解析且必填字段存在"
     ],
     "entryPoints": [
       {
         "path": "data/entries.jsonl",
-        "why": "Issue 明确要求读取并修复该文件中的 trace 数据，是核心输入"
+        "why": "Issue 指定输入文件，需了解 trace/entry_point/critical_operation 实际结构与样本"
       },
       {
         "path": "SCHEMA.md",
-        "why": "验收标准第6条要求修复后数据满足其基础约束，需据此校验输出"
+        "why": "验收标准第6条要求修复后数据满足其基础约束，须阅读字段定义与校验不变量"
       },
       {
         "path": "README.md",
-        "why": "仓库布局与数据格式说明，含 entries.jsonl 字段示例，辅助理解 trace 结构"
+        "why": "确认仓库布局、entries.jsonl 说明及 verify 字段含义，指导脚本运行与数据加载"
       }
     ],
     "implementationPlan": [
       {
-        "title": "解析与理解数据结构",
-        "detail": "阅读 SCHEMA.md 与 data/entries.jsonl 样本，明确 entry_point、critical_operation、trace 节点字段（file, line, code, desc）及 line 两种格式",
-        "verification": "能列举 trace 节点必含字段并说明整数与 start-end 解析方式"
+        "title": "阅读数据与模式",
+        "detail": "阅读 SCHEMA.md 与 data/entries.jsonl 前若干行，确认 entry_point/critical_operation/trace 的 file/line/code/desc 结构及 line 两种格式",
+        "verification": "能列举 trace 节点字段并说明整数与 start-end 解析方式"
       },
       {
-        "title": "编写检测模块",
-        "detail": "实现重复节点检测（同 file/line/code 合并首次出现）与同文件顺序异常检测（行号越界），跨文件标记跳过行号比较",
-        "verification": "对 entry-00103/00320/00511/00185 能输出对应异常类型"
+        "title": "实现检测与解析模块",
+        "detail": "编写函数解析 line（整数或 start-end），判断同文件重复（file+line+code 全同）与顺序异常（同文件下行号越界）",
+        "verification": "对 issue 所给 entry-00103/00320/00511/00185 能输出对应异常标记"
       },
       {
-        "title": "实现处理模式与日志",
-        "detail": "保守模式仅记录；修复模式删除越界节点并写 trace_fix_log，含 entry_id、路径、前后内容、原因",
-        "verification": "运行修复模式生成 trace_fix_log.csv 且字段完整"
+        "title": "实现处理与日志",
+        "detail": "实现保守模式（仅记录）与修复模式（删越界节点），写 trace_fix_log 与 trace_fixed.jsonl，跨文件保留序",
+        "verification": "运行后生成日志与修复文件，日志含 entry_id/路径/前后内容/原因"
       },
       {
-        "title": "输出交付物",
-        "detail": "生成 entries.trace_fixed.jsonl、检测报告、README 说明运行方式与限制",
-        "verification": "所有交付物存在且 README 可被新手按步骤运行"
+        "title": "报告与文档",
+        "detail": "生成检测报告统计四类数量，编写 README 说明运行方式、策略与限制",
+        "verification": "报告数字与日志一致，README 可被新人按步骤执行"
       }
     ],
     "risks": [
       {
         "level": "中",
-        "risk": "start-end 区间与 entry_point.line 比较边界易误判",
-        "mitigation": "明确区间与单点比较规则，保守模式优先记录不修"
+        "risk": "SCHEMA.md 具体约束未在本证据中展开，可能遗漏必填校验",
+        "mitigation": "实现后对照 SCHEMA.md 逐字段校验修复文件，补充单测"
       },
       {
         "level": "低",
-        "risk": "trace 含入口/关键操作本身被误删",
-        "mitigation": "Issue 备注区分重复出现与内部重复，检测时排除合理包含"
+        "risk": "start-end 区间与 entry_point 行号比较边界模糊",
+        "mitigation": "默认以区间起点参与比较，并在 README 注明策略"
       },
       {
-        "level": "中",
-        "risk": "跨文件顺序异常被错误重排",
-        "mitigation": "跨文件节点标记不参与行号比较，仅留原始序"
+        "level": "低",
+        "risk": "trace 含入口/关键操作本身被误判为异常",
+        "mitigation": "按 issue 备注区分 trace 内部重复与自身出现，仅检同文件越界"
       }
     ],
     "questions": [
-      "SCHEMA.md 中对 trace 节点 line 为 start-end 时的精确校验规则是什么？",
-      "修复模式中'明显越界'是否包含区间部分重叠情形，还是仅完全越界？",
-      "entry-00185 人工复核的具体判定条件是否由脚本输出待审标记即可？",
-      "修改日志 CSV 与 JSON 是否需同时交付，还是二选一？"
+      "SCHEMA.md 中 entry_point/critical_operation/trace 的精确必填字段与行号格式约定是什么？",
+      "修复模式中删除越界节点后，是否允许调整后续 desc 或必须保留原 desc？",
+      "entry-00185 等需人工复核的样本，脚本应输出到单独文件还是仅在日志标记？",
+      "跨文件 trace 节点的 file 字段是否与 entry_point.file 不同即视为跨文件？"
     ],
     "testPlan": [
       {
-        "scenario": "正常流程：读取含 entry-00103 的 entries.jsonl 跑保守模式",
-        "expected": "报告记录该 entry 同文件节点早于 entry point，不修改原数据"
+        "scenario": "正常流程：读取含 issue 示例 entry 的 entries.jsonl 并跑保守模式",
+        "expected": "生成异常报告与日志，不修改原数据，标记出 4 个示例 entry 的对应异常"
       },
       {
-        "scenario": "边界条件：line 为 '10-20' 且 entry_point.line=15",
-        "expected": "区间覆盖不报异常；若 entry_point.line=25 则报越界"
+        "scenario": "边界条件：line 为 '10-20' 字符串且 entry_point.line=15",
+        "expected": "按起点或区间策略比较，不抛异常且记录比较方式"
       },
       {
-        "scenario": "失败路径：data/entries.jsonl 缺失或格式错",
-        "expected": "脚本报错并退出码非0，提示文件问题"
+        "scenario": "边界条件：trace 首节点 file/line/code 与后续完全相同",
+        "expected": "检测为重复候选，保留首次出现并记录日志"
       },
       {
-        "scenario": "跨文件：trace 含两文件节点且行号逆序",
-        "expected": "不重排，报告标记跨文件不参与比较"
+        "scenario": "失败路径：entries.jsonl 某行 JSON 损坏",
+        "expected": "脚本报错并指明行号，不生成不完整修复文件"
       },
       {
-        "scenario": "重复节点：同 file/line/code 出现两次",
-        "expected": "合并保留首次，desc 若不同记录提示"
+        "scenario": "失败路径：跨文件 trace 节点行号小于 entry_point.line",
+        "expected": "不视为顺序异常，仅标记跨文件不参与比较"
       }
     ],
     "sources": [
@@ -173,12 +173,12 @@
     ],
     "meta": {
       "model": "hy3",
-      "elapsedMs": 22414,
+      "elapsedMs": 21430,
       "promptTokens": 5128,
-      "completionTokens": 1170,
-      "generatedAt": "2026-07-29T07:29:18.132Z"
+      "completionTokens": 1248,
+      "generatedAt": "2026-07-29T08:06:54.121Z"
     }
   },
-  "evaluatedAt": "2026-07-29T07:29:18.134Z",
-  "wallTimeMs": 22510
+  "evaluatedAt": "2026-07-29T08:06:54.123Z",
+  "wallTimeMs": 21555
 }
