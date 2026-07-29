@@ -201,7 +201,7 @@ function toMarkdown(result: IssueAnalysis): string {
 
   return `# ${result.project.owner}/${result.project.repo} #${result.project.number} 贡献计划
 
-> 由 IssuePilot + ${result.meta.model} 生成于 ${result.meta.generatedAt}
+> 由 Issue-killer + ${result.meta.model} 生成于 ${result.meta.generatedAt}
 
 ## Issue
 
@@ -472,7 +472,7 @@ function Report({ result }: { result: IssueAnalysis }) {
   );
 }
 
-export default function IssuePilotApp() {
+export default function IssueKillerApp() {
   const [url, setUrl] = useState(DEMOS[0].url);
   const [apiKey, setApiKey] = useState("");
   const [showKey, setShowKey] = useState(false);
@@ -541,9 +541,9 @@ export default function IssuePilotApp() {
   return (
     <main>
       <nav className="topbar" aria-label="主导航">
-        <a className="brand" href="#top" aria-label="IssuePilot 首页">
+        <a className="brand" href="#top" aria-label="Issue-killer 首页">
           <span className="brand-mark"><SparkIcon /></span>
-          <span>IssuePilot</span>
+          <span>Issue-killer</span>
           <em>HY3</em>
         </a>
         <div className="nav-links">
@@ -573,7 +573,7 @@ export default function IssuePilotApp() {
             到一份<span>能开工</span>的计划。
           </h1>
           <p>
-            IssuePilot 读取公开的 Issue、README 与仓库目录，让 Hy3
+            Issue-killer 读取公开的 Issue、README 与仓库目录，让 Hy3
             把模糊需求拆成验收标准、真实代码入口、实施步骤和测试清单。
           </p>
           <div className="hero-proof">
@@ -583,9 +583,9 @@ export default function IssuePilotApp() {
           </div>
         </div>
 
-        <div className="hero-console" aria-label="IssuePilot 工作流预览">
+        <div className="hero-console" aria-label="Issue-killer 工作流预览">
           <div className="console-top">
-            <span>ISSUEPILOT / RUN_042</span>
+            <span>ISSUE-KILLER / RUN_042</span>
             <div><i /><i /><i /></div>
           </div>
           <div className="console-body">
@@ -747,7 +747,7 @@ export default function IssuePilotApp() {
         <div className="footer-brand">
           <span className="brand-mark"><SparkIcon /></span>
           <div>
-            <b>IssuePilot</b>
+            <b>Issue-killer</b>
             <small>Powered by Tencent Hunyuan Hy3</small>
           </div>
         </div>

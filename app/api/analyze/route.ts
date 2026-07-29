@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import {
+  GitHubFetchError,
+  GitHubUrlError,
   loadRepositoryContext,
   parseGitHubIssueUrl,
 } from "@/lib/github";
@@ -11,6 +13,18 @@ export const runtime = "edge";
 function errorResponse(message: string, status = 400) {
   return NextResponse.json({ error: message }, { status });
 }
+
+function sanitizeErrorMessage(
+  message: string,
+  credentials: Array<string | undefined>,
+): string {
+  return credentials.reduce(
+    (safeMessage, credential) =>
+      credential ? safeMessage.split(credential).join("[已脱敏]") : safeMessage,
+    message,
+  );
+}
+
 export async function POST(request: Request) {
   const startedAt = Date.now();
   let body: AnalyzeRequest;
@@ -37,9 +51,17 @@ export async function POST(request: Request) {
     return errorResponse("Hy3 API Key 格式不正确。", 401);
   }
 
+  const githubToken =
+    typeof body.githubToken === "string" ? body.githubToken.trim() : "";
+  if (githubToken && (githubToken.length < 20 || githubToken.length > 300)) {
+    return errorResponse("GitHub Token 格式不正确。", 401);
+  }
+
   try {
     const parsed = parseGitHubIssueUrl(body.url);
-    const context = await loadRepositoryContext(parsed);
+    const context = await loadRepositoryContext(parsed, {
+      githubToken: githubToken || undefined,
+    });
     const { analysis, usage } = await analyzeWithHy3({
       apiKey,
       parsed,
@@ -77,9 +99,17 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    const message =
+    const rawMessage =
       error instanceof Error ? error.message : "分析失败，请稍后重试。";
-    const status = /API Key/.test(message) ? 401 : 502;
+    const message = sanitizeErrorMessage(rawMessage, [apiKey, githubToken]);
+    const status =
+      error instanceof GitHubUrlError
+        ? 400
+        : error instanceof GitHubFetchError && error.statusCode === 404
+        ? 404
+        : /API Key/.test(message)
+          ? 401
+          : 502;
     return errorResponse(message, status);
   }
 }

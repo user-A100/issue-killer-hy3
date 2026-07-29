@@ -60,4 +60,5 @@ export type IssueAnalysis = {
 export type AnalyzeRequest = {
   url: string;
   apiKey?: string;
+  githubToken?: string;
 };

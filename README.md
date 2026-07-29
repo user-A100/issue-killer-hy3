@@ -1,10 +1,14 @@
-# IssuePilot
+# Issue-killer
 
 > 从一个 GitHub Issue，到一份有证据、能验证、可以直接开工的贡献计划。
 
-IssuePilot 是为 [2026 腾讯犀牛鸟开源人才培养计划 · Hy3 Issue #4](https://github.com/Tencent-Hunyuan/Hy3/issues/4) 构建的端到端 Web 应用。它读取公开 GitHub Issue、仓库说明和真实目录，再由腾讯混元 **Hy3** 生成结构化的任务摘要、验收标准、代码入口、实施计划、风险、待确认问题与测试清单。
+Issue-killer 是为 [2026 腾讯犀牛鸟开源人才培养计划 · Hy3 Issue #4](https://github.com/Tencent-Hunyuan/Hy3/issues/4) 构建的端到端 Web 应用。它读取公开 GitHub Issue、仓库说明和真实目录，再由腾讯混元 **Hy3** 生成结构化的任务摘要、验收标准、代码入口、实施计划、风险、待确认问题与测试清单。
 
-![IssuePilot 演示](docs/demo/issuepilot-demo.gif)
+![Issue-killer 项目封面](public/og.png)
+
+### 18 秒端到端演示
+
+![Issue-killer 双流程演示](docs/demo/issue-killer-demo.gif)
 
 ## Hy3 在系统中的角色
 
@@ -19,12 +23,13 @@ model: hy3
 
 ## Issue #4 要求对照
 
-| 任务要求 | IssuePilot 的实现 | 证据 |
+| 任务要求 | Issue-killer 的实现 | 证据 |
 | --- | --- | --- |
+| CodeBuddy / WorkBuddy + Hy3 API | Hy3 已真实接入；CodeBuddy CLI 已完成三轮安全复核，修复全部 high/medium 问题，最终结论为 `pass` | [`docs/AI_COLLABORATION.md`](docs/AI_COLLABORATION.md)、[`docs/codebuddy-review.json`](docs/codebuddy-review.json) |
 | 全程通过 API 调用 Hy3 | 服务端调用 Hy3 Chat Completions；无训练、微调和本地模型 | `lib/hy3.ts` |
-| 至少一个交互前端 | 可输入 Issue URL 和个人 API Key 的响应式 Web 应用 | `app/IssuePilotApp.tsx` |
+| 至少一个交互前端 | 可输入 Issue URL 和个人 API Key 的响应式 Web 应用 | `app/IssueKillerApp.tsx` |
 | 至少两个端到端 Demo | Hy3 #4（产品型）与 VulnGym #5（工程型） | `evals/results/`、`evals/report.md` |
-| 不超过 2 分钟的视频或 GIF | 约 20 秒的双流程演示 GIF | `docs/demo/issuepilot-demo.gif` |
+| 不超过 2 分钟的视频或 GIF | 约 20 秒的双流程演示 GIF | `docs/demo/issue-killer-demo.gif` |
 | 项目开源 | MIT License、完整运行文档与贡献指南 | `LICENSE`、`CONTRIBUTING.md` |
 | README 说明 Hy3 角色 | 见上文与架构文档 | `docs/ARCHITECTURE.md` |
 | 记录 AI 编程协作 | 按模块记录协作内容和人工验证 | `docs/AI_COLLABORATION.md` |
@@ -103,7 +108,7 @@ set HY3_API_KEY=your-key
 npm run eval
 ```
 
-评测脚本默认请求 `http://localhost:3000/api/analyze`；可通过 `ISSUEPILOT_BASE_URL` 指向其他部署。脚本不会保存 Key，只保存结构化结果和字段完整性检查。
+评测脚本默认请求 `http://localhost:3000/api/analyze`；可通过 `ISSUE_KILLER_BASE_URL` 指向其他部署。若 GitHub 匿名额度不足，可临时通过 `GITHUB_TOKEN` 提供只读令牌。脚本不会保存任何 Key 或 Token，只保存结构化结果和字段完整性检查。
 
 ## 技术栈
 
@@ -117,7 +122,7 @@ npm run eval
 ```text
 app/
   api/analyze/route.ts     # 安全编排 GitHub 与 Hy3
-  IssuePilotApp.tsx        # 交互界面与报告导出
+  IssueKillerApp.tsx       # 交互界面与报告导出
 lib/
   github.ts                # URL 白名单与 GitHub 证据读取
   hy3.ts                   # Prompt、Hy3 调用、输出校验

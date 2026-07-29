@@ -4,9 +4,10 @@ const root = new URL("../", import.meta.url);
 const cases = JSON.parse(
   await readFile(new URL("evals/cases.json", root), "utf8"),
 );
-const baseUrl = (process.env.ISSUEPILOT_BASE_URL || "http://localhost:3000")
+const baseUrl = (process.env.ISSUE_KILLER_BASE_URL || "http://localhost:3000")
   .replace(/\/+$/, "");
 const apiKey = process.env.HY3_API_KEY;
+const githubToken = process.env.GITHUB_TOKEN;
 
 if (!apiKey) {
   throw new Error("请先通过环境变量 HY3_API_KEY 提供密钥；脚本不会保存它。");
@@ -65,7 +66,11 @@ for (const testCase of cases) {
   const response = await fetch(`${baseUrl}/api/analyze`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ url: testCase.url, apiKey }),
+    body: JSON.stringify({
+      url: testCase.url,
+      apiKey,
+      ...(githubToken ? { githubToken } : {}),
+    }),
   });
   const result = await response.json();
   if (!response.ok) {
@@ -109,11 +114,11 @@ ${checks.map((check) => `- ${check.pass ? "✅" : "❌"} ${check.name}：${check
   )
   .join("\n\n");
 
-const report = `# IssuePilot 真实 Hy3 评测报告
+const report = `# Issue-killer 真实 Hy3 评测报告
 
 生成时间：${generatedAt}
 
-> 两个案例均通过 IssuePilot 的公开 HTTP 接口完成 GitHub 证据抓取、Hy3 API 分析、结构校验和结果落盘。API Key 未写入产物。
+> 两个案例均通过 Issue-killer 的公开 HTTP 接口完成 GitHub 证据抓取、Hy3 API 分析、结构校验和结果落盘。API Key 未写入产物。
 
 | 案例 | 结果 | 模型 | API 耗时 | 证据来源 |
 | --- | --- | --- | ---: | ---: |

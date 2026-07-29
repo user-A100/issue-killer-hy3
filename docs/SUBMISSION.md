@@ -7,15 +7,15 @@
 在 fork 的 `rhinobird2026` 分支新增：
 
 ```text
-rhinobird2026/issuepilot/README.md
+rhinobird2026/issue-killer/README.md
 ```
 
-内容包含项目名称、仓库地址、在线演示、Demo GIF、作者、Hy3 的角色和 Issue #4 链接。
+内容包含项目名称、仓库地址、项目封面、在线演示、Demo GIF、作者、Hy3 的角色和 Issue #4 链接。
 
 ## PR 标题
 
 ```text
-[RhinoBird 2026] IssuePilot — Hy3-powered GitHub contribution planner
+[RhinoBird 2026] Issue-killer — Hy3-powered GitHub contribution planner
 ```
 
 ## PR 描述
@@ -23,9 +23,10 @@ rhinobird2026/issuepilot/README.md
 ```markdown
 ## 项目
 
-IssuePilot：把公开 GitHub Issue 转换为有证据、可验证的贡献计划。
+Issue-killer：把公开 GitHub Issue 转换为有证据、可验证的贡献计划。
 
 - 项目仓库：<公开 GitHub 仓库 URL>
+- 项目封面：<仓库中的 public/og.png URL>
 - 在线演示：<部署 URL>
 - 演示 GIF：<仓库中的 GIF URL>
 - 对应任务：#4

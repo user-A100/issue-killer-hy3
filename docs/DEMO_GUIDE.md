@@ -30,4 +30,4 @@
 - 浏览器地址栏、终端与配置文件中不出现 Key。
 - 只展示公开 GitHub 内容和脱敏后的 Hy3 输出。
 
-生成后的 GIF 放在 `docs/demo/issuepilot-demo.gif`，并在 README 首屏引用。
+生成后的 GIF 放在 `docs/demo/issue-killer-demo.gif`，并在 README 首屏引用。

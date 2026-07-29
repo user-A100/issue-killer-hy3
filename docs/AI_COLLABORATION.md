@@ -12,35 +12,29 @@
 
 ## CodeBuddy / WorkBuddy 复核记录
 
-> 提交前在 CodeBuddy 或 WorkBuddy 中完成一次代码审查，并把实际结果填写到下表。不要伪造协作记录。
+CodeBuddy CLI `2.128.1` 已通过腾讯账号登录并完成真实代码复核。CLI 会话报告使用模型为 `Hy3`；最终脱敏结果保存在 [`codebuddy-review.json`](codebuddy-review.json)，只包含结论和发现，不包含源码、请求记录或密钥。
 
-CodeBuddy CLI `2.128.1` 已按腾讯官方方式安装。当前设备尚未完成 CodeBuddy 首次登录，因此本仓库没有把安装动作冒充为已完成的 AI 协作。登录后运行以下命令即可生成脱敏的真实复核产物：
+复核可通过以下命令重复执行：
 
 ```powershell
-codebuddy
-# 在交互界面输入 /login，完成腾讯账号授权后退出
 powershell -ExecutionPolicy Bypass -File scripts/run-codebuddy-review.ps1
 ```
 
 | 日期 | 工具 | 审查范围 | 采纳的建议 | 未采纳及原因 |
 | --- | --- | --- | --- | --- |
-| 待填写 | CodeBuddy / WorkBuddy | `lib/github.ts`、`lib/hy3.ts`、`app/api/analyze/route.ts` | 待填写 | 待填写 |
+| 2026-07-29 | CodeBuddy CLI `2.128.1`（Hy3） | `lib/github.ts`、`lib/hy3.ts`、`app/api/analyze/route.ts` | 收紧 GitHub URL 与路径段校验；区分输入、404 与上游错误；加入严格且可降级的 JSON schema 校验；把 Hy3 超时收敛到 30 秒；统一对外错误脱敏；增加格式、边界和回归测试 | 最终报告剩余 6 项均为 low：限流状态细分、额外密钥正则、超长非标准密钥、极端超长模型输出、非标准 GitHub 端口和更大的生成上限。当前固定 API 域名、精确密钥替换、20–300 字符官方密钥范围、6000 token 上限及结构化错误已覆盖两条真实流程，因此保留为后续增强，不阻塞提交 |
 
-建议复核提示词：
+最终复核结论：
 
-```text
-请审查这个 Hy3 API Web 应用，重点检查：
-1. GitHub URL 解析是否存在 SSRF；
-2. API Key 是否可能写入日志、存储或前端产物；
-3. Hy3 JSON 输出校验是否足够；
-4. 两个端到端 Demo 是否满足 README 中的验收矩阵。
-请按严重级别给出文件、位置、问题和修复建议。
-```
+- `verdict`: `pass`
+- high / medium：0
+- low：6，均已记录原因和后续增强方向
+- 复核产物：[`docs/codebuddy-review.json`](codebuddy-review.json)
 
 ## 人工确认清单
 
-- [ ] CodeBuddy / WorkBuddy 的真实审查记录已填写。
-- [ ] 审查发现的高危与中危问题已修复或解释。
-- [ ] `npm run lint` 和 `npm test` 通过。
-- [ ] 两个真实 Demo 已重新运行，结果中没有密钥。
-- [ ] 演示 GIF 不超过 2 分钟。
+- [x] CodeBuddy / WorkBuddy 的真实审查记录已填写。
+- [x] 审查发现的高危与中危问题已修复并重新复核。
+- [x] `npm run lint` 和 `npm test` 通过。
+- [x] 两个真实 Demo 已重新运行，结果中没有密钥。
+- [x] 演示 GIF 约 18 秒，不超过 2 分钟。

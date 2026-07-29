@@ -1,8 +1,8 @@
-# IssuePilot 架构与信任边界
+# Issue-killer 架构与信任边界
 
 ## 目标
 
-IssuePilot 的目标不是替代开发者做技术决策，而是把 Issue 中散落的要求变成一份带来源、可验证的开工清单。系统设计优先级为：
+Issue-killer 的目标不是替代开发者做技术决策，而是把 Issue 中散落的要求变成一份带来源、可验证的开工清单。系统设计优先级为：
 
 1. 证据可追溯；
 2. 模型输出不越过已读取上下文；
@@ -50,7 +50,7 @@ Hy3 不负责：
 
 ### 密钥
 
-- BYOK 密钥只存在于输入框状态、当前 HTTPS 请求体和上游 Authorization Header。
+- BYOK 密钥或评测用 GitHub Token 只存在于输入框/当前进程状态、当前 HTTPS 请求体和对应上游 Authorization Header。
 - 前端不调用 localStorage、sessionStorage、cookie 或 IndexedDB。
 - 服务端不记录请求体，返回值不包含 Key。
 - `.env*` 默认被 Git 忽略，只有无密钥的 `.env.example` 被纳入版本控制。

@@ -1,6 +1,6 @@
 # Contributing
 
-感谢你改进 IssuePilot。
+感谢你改进 Issue-killer。
 
 ## 开始前
 

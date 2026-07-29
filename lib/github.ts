@@ -52,33 +52,70 @@ export type RepositoryContext = {
 };
 
 const GITHUB_HOSTS = new Set(["github.com", "www.github.com"]);
+const MAX_GITHUB_NUMBER = 2_147_483_647;
+
+export class GitHubFetchError extends Error {
+  constructor(
+    message: string,
+    public readonly statusCode: number,
+  ) {
+    super(message);
+    this.name = "GitHubFetchError";
+  }
+}
+
+export class GitHubUrlError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "GitHubUrlError";
+  }
+}
 
 export function parseGitHubIssueUrl(value: string): ParsedGitHubUrl {
   let url: URL;
   try {
     url = new URL(value.trim());
   } catch {
-    throw new Error("请输入完整的 GitHub Issue URL。");
+    throw new GitHubUrlError("请输入完整的 GitHub Issue URL。");
   }
 
-  if (url.protocol !== "https:" || !GITHUB_HOSTS.has(url.hostname)) {
-    throw new Error("目前仅支持 github.com 上的公开 Issue 或 Pull Request。");
+  const hostname = url.hostname.toLowerCase().replace(/\.+$/, "");
+  if (
+    url.protocol !== "https:" ||
+    !GITHUB_HOSTS.has(hostname) ||
+    url.username ||
+    url.password
+  ) {
+    throw new GitHubUrlError(
+      "目前仅支持 github.com 上的公开 Issue 或 Pull Request。",
+    );
   }
 
   const parts = url.pathname.split("/").filter(Boolean);
-  if (parts.length < 4 || !["issues", "pull"].includes(parts[2])) {
-    throw new Error("URL 格式应为 github.com/owner/repo/issues/123。");
+  if (parts.length !== 4 || !["issues", "pull"].includes(parts[2])) {
+    throw new GitHubUrlError(
+      "URL 格式应为 github.com/owner/repo/issues/123。",
+    );
   }
 
   const number = Number(parts[3]);
-  if (!Number.isInteger(number) || number <= 0) {
-    throw new Error("Issue 编号无效。");
+  if (
+    !Number.isInteger(number) ||
+    number <= 0 ||
+    number > MAX_GITHUB_NUMBER
+  ) {
+    throw new GitHubUrlError("Issue 编号无效。");
   }
 
   const owner = parts[0];
   const repo = parts[1].replace(/\.git$/i, "");
-  if (!/^[A-Za-z0-9_.-]+$/.test(owner) || !/^[A-Za-z0-9_.-]+$/.test(repo)) {
-    throw new Error("仓库地址包含不支持的字符。");
+  if (
+    !/^[A-Za-z0-9_.-]+$/.test(owner) ||
+    !/^[A-Za-z0-9_.-]+$/.test(repo) ||
+    /^\.+$/.test(owner) ||
+    /^\.+$/.test(repo)
+  ) {
+    throw new GitHubUrlError("仓库地址包含不支持的字符。");
   }
 
   const kind = parts[2] as "issues" | "pull";
@@ -90,35 +127,49 @@ export function parseGitHubIssueUrl(value: string): ParsedGitHubUrl {
     canonicalUrl: `https://github.com/${owner}/${repo}/${kind}/${number}`,
   };
 }
-function githubHeaders(): HeadersInit {
+function githubHeaders(githubToken?: string): HeadersInit {
   const headers: Record<string, string> = {
     Accept: "application/vnd.github+json",
-    "User-Agent": "IssuePilot-Hy3",
+    "User-Agent": "Issue-Killer-Hy3",
     "X-GitHub-Api-Version": "2022-11-28",
   };
-  if (process.env.GITHUB_TOKEN) {
-    headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+  const token = githubToken || process.env.GITHUB_TOKEN;
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
   }
   return headers;
 }
 
-async function githubFetch<T>(path: string, optional = false): Promise<T | null> {
+async function githubFetch<T>(
+  path: string,
+  optional = false,
+  githubToken?: string,
+): Promise<T | null> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 12_000);
   try {
     const response = await fetch(`https://api.github.com${path}`, {
-      headers: githubHeaders(),
+      headers: githubHeaders(githubToken),
       signal: controller.signal,
     });
     if (optional && response.status === 404) return null;
     if (!response.ok) {
       if (response.status === 403 || response.status === 429) {
-        throw new Error("GitHub 公共接口暂时达到访问上限，请稍后重试。");
+        throw new GitHubFetchError(
+          "GitHub 公共接口暂时达到访问上限，请稍后重试。",
+          response.status,
+        );
       }
       if (response.status === 404) {
-        throw new Error("没有找到该公开 Issue，或仓库暂时不可访问。");
+        throw new GitHubFetchError(
+          "没有找到该公开 Issue，或仓库暂时不可访问。",
+          404,
+        );
       }
-      throw new Error(`读取 GitHub 失败（${response.status}）。`);
+      throw new GitHubFetchError(
+        `读取 GitHub 失败（${response.status}）。`,
+        response.status,
+      );
     }
     return (await response.json()) as T;
   } catch (error) {
@@ -151,20 +202,23 @@ function clamp(value: string, limit: number): string {
 
 export async function loadRepositoryContext(
   parsed: ParsedGitHubUrl,
+  options: { githubToken?: string } = {},
 ): Promise<RepositoryContext> {
   const issuePath = `/repos/${parsed.owner}/${parsed.repo}/issues/${parsed.number}`;
   const repoPath = `/repos/${parsed.owner}/${parsed.repo}`;
 
   const [issue, repository, readmeResponse, rootResponse] = await Promise.all([
-    githubFetch<GitHubIssue>(issuePath),
-    githubFetch<GitHubRepo>(repoPath),
+    githubFetch<GitHubIssue>(issuePath, false, options.githubToken),
+    githubFetch<GitHubRepo>(repoPath, false, options.githubToken),
     githubFetch<GitHubContent>(
       `/repos/${parsed.owner}/${parsed.repo}/readme`,
       true,
+      options.githubToken,
     ),
     githubFetch<RootEntry[]>(
       `/repos/${parsed.owner}/${parsed.repo}/contents`,
       true,
+      options.githubToken,
     ),
   ]);
 
@@ -182,6 +236,7 @@ export async function loadRepositoryContext(
     contributingResponse = await githubFetch<GitHubContent>(
       `/repos/${parsed.owner}/${parsed.repo}/contents${candidate}`,
       true,
+      options.githubToken,
     );
     if (contributingResponse) break;
   }

@@ -1,5 +1,5 @@
-import IssuePilotApp from "./IssuePilotApp";
+import IssueKillerApp from "./IssueKillerApp";
 
 export default function Home() {
-  return <IssuePilotApp />;
+  return <IssueKillerApp />;
 }

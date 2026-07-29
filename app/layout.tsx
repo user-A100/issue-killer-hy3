@@ -28,22 +28,22 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase,
     title: {
-      default: "IssuePilot · 从 Issue 到可执行计划",
-      template: "%s · IssuePilot",
+      default: "Issue-killer · 从 Issue 到可执行计划",
+      template: "%s · Issue-killer",
     },
     description:
       "由腾讯混元 Hy3 驱动的开源 Issue 分析工作台：提取验收标准、代码入口、实施计划、风险与测试清单。",
     openGraph: {
-      title: "IssuePilot · 从 Issue 到可执行计划",
+      title: "Issue-killer · 从 Issue 到可执行计划",
       description: "把公开 GitHub Issue 转换成有证据、可验证的贡献计划。",
       type: "website",
       locale: "zh_CN",
       url: metadataBase,
-      images: [{ url: imageUrl, width: 1200, height: 630, alt: "IssuePilot" }],
+      images: [{ url: imageUrl, width: 1200, height: 630, alt: "Issue-killer" }],
     },
     twitter: {
       card: "summary_large_image",
-      title: "IssuePilot · 从 Issue 到可执行计划",
+      title: "Issue-killer · 从 Issue 到可执行计划",
       description: "由 Hy3 驱动的开源贡献工作台。",
       images: [imageUrl],
     },

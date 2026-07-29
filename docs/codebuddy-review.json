@@ -1,0 +1,43 @@
+﻿{
+    "tool":  "CodeBuddy",
+    "summary":  "三个服务端文件整体安全姿态良好。GitHub URL 解析对协议、主机、用户凭证、路径分段与编号做了较严格校验，且实际出站请求硬编码到 api.github.com 与配置的 Hy3 Base URL，SSRF 风险被有效消除，无明显路径绕过。Hy3 API Key（BYOK）仅随单次请求进入、仅用于 Authorization 头，不记录、不存储、不回传；错误响应经由 hy3.ts 的 split(apiKey) 与 route.ts 的 sanitizeErrorMessage 双重脱敏，密钥泄漏面可控。JSON 校验（normalizeModelOutput/extractJson）、超时（GitHub 12s、Hy3 30s）与结构归一化均较完整。仅发现若干低优先级的健壮性与兼容性问题，未发现 high/medium 级缺陷。",
+    "findings":  [
+                     {
+                         "severity":  "low",
+                         "file":  "app/api/analyze/route.ts",
+                         "issue":  "GitHubFetchError 的 403/429（限流）在 catch 中统一映射为 HTTP 502，未区分限流场景，客户端/演示无法据此做退避重试，可能把“稍后重试”误判为服务端故障而反复失败。",
+                         "recommendation":  "将 GitHubFetchError 的 403/429 单独映射为对应状态码（或至少返回 429/403）并附“请稍后重试”提示，必要时在响应头给出 Retry-After，避免演示在限流时被误判为故障。"
+                     },
+                     {
+                         "severity":  "low",
+                         "file":  "lib/hy3.ts",
+                         "issue":  "sanitizeUpstreamMessage 的前缀正则仅覆盖 sk-/gh[pousr]_/github_pat_ 等固定格式，Hy3 密钥格式未必命中；不过 split(apiKey) 已对 BYOK 密钥做精确脱敏，实际无泄漏。该正则更偏装饰性。",
+                         "recommendation":  "作为纵深防御，可补充更通用的密钥/凭证匹配（如 Bearer \u003ctoken\u003e、较长随机串），但核心仍应依赖 split(apiKey) 的精确脱敏，确保任意格式的 BYOK 密钥都不进入错误响应。"
+                     },
+                     {
+                         "severity":  "low",
+                         "file":  "app/api/analyze/route.ts",
+                         "issue":  "apiKey 长度校验为 20–300。若共享密钥或用户 BYOK 密钥超过 300 字符，会被误判为“格式不正确”返回 401，可能直接破坏 BYOK 演示流程。",
+                         "recommendation":  "放宽长度上限或仅做长度下限与基本格式校验（如非空、无空白），避免因密钥本身偏长而拒绝合法请求。"
+                     },
+                     {
+                         "severity":  "low",
+                         "file":  "lib/hy3.ts",
+                         "issue":  "extractJson 的 findFirstJsonValue 对超长输出采用逐字符 O(n²) 扫描，在极端大响应下可能逼近 30s 超时；且对模型把 JSON 包裹在说明性文本中的情况依赖启发式匹配。",
+                         "recommendation":  "在扫描前对 content 设合理长度上限（如 64k），并优先尝试“直接解析 / 代码围栏 / 含 summary 或 difficulty 键的对象”的精确提取，降低在最坏情况下的耗时。"
+                     },
+                     {
+                         "severity":  "low",
+                         "file":  "lib/github.ts",
+                         "issue":  "parseGitHubIssueUrl 未拒绝非标准端口（如 github.com:8443）。由于代码从不按用户输入 URL 发起请求（始终请求 api.github.com），此点不可被 SSRF 利用，仅属防御纵深缺口。",
+                         "recommendation":  "作为纵深防御，可拒绝 url.port 非空且非 443 的输入，进一步收窄解析边界。"
+                     },
+                     {
+                         "severity":  "low",
+                         "file":  "lib/hy3.ts",
+                         "issue":  "请求设置 max_tokens=6000，若模型输出在达到上限前被截断，可能产生不完整的 JSON，使 extractJson/normalizeModelOutput 抛错并中断演示；对体量较大的 Issue 分析存在截断风险。",
+                         "recommendation":  "根据分析体量适度上调 max_tokens，或在截断兜底时给出更友好的重试/降级提示，避免演示因输出截断而失败。"
+                     }
+                 ],
+    "verdict":  "pass"
+}

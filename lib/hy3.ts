@@ -37,8 +37,17 @@ function safeArray<T>(
   if (!Array.isArray(value)) return [];
   return value.filter(guard).slice(0, max);
 }
+
+function optionalArray(value: unknown): unknown[] {
+  return Array.isArray(value) ? value : [];
+}
+
 function isString(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
 function isPlanStep(value: unknown): value is PlanStep {
@@ -73,62 +82,126 @@ function isTest(value: unknown): value is TestItem {
   return isString(item.scenario) && isString(item.expected);
 }
 
-function normalizeModelOutput(value: unknown, raw: string): ModelAnalysis {
-  const source =
-    value && typeof value === "object"
-      ? (value as Record<string, unknown>)
-      : {};
-  const difficulty =
-    source.difficulty && typeof source.difficulty === "object"
-      ? (source.difficulty as Record<string, unknown>)
-      : {};
-  const level = ["高", "中", "低"].includes(String(difficulty.level))
-    ? (String(difficulty.level) as "高" | "中" | "低")
-    : "中";
+export function normalizeModelOutput(value: unknown): ModelAnalysis {
+  if (!isRecord(value)) {
+    throw new Error("Hy3 返回的 JSON 不是对象，请重试。");
+  }
+
+  const source = value;
+  const difficulty = isRecord(source.difficulty) ? source.difficulty : null;
+  const hasValidShape =
+    isString(source.summary) &&
+    difficulty !== null &&
+    ["高", "中", "低"].includes(String(difficulty.level)) &&
+    isString(difficulty.rationale);
+
+  if (!hasValidShape || !difficulty) {
+    throw new Error("Hy3 返回的分析结构不完整，请重试。");
+  }
+
+  const level = String(difficulty.level) as "高" | "中" | "低";
 
   return {
-    summary:
-      (isString(source.summary) && source.summary.trim()) ||
-      raw.trim() ||
-      "Hy3 已完成分析，但返回内容未能结构化。",
+    summary: String(source.summary).trim(),
     difficulty: {
       level,
-      rationale:
-        (isString(difficulty.rationale) && difficulty.rationale.trim()) ||
-        "需要结合仓库上下文进一步确认。",
+      rationale: String(difficulty.rationale).trim(),
     },
-    acceptanceCriteria: safeArray(source.acceptanceCriteria, isString, 10),
-    entryPoints: safeArray(source.entryPoints, isEntryPoint, 8),
+    acceptanceCriteria: safeArray(
+      optionalArray(source.acceptanceCriteria),
+      isString,
+      10,
+    ),
+    entryPoints: safeArray(optionalArray(source.entryPoints), isEntryPoint, 8),
     implementationPlan: safeArray(
-      source.implementationPlan,
+      optionalArray(source.implementationPlan),
       isPlanStep,
       8,
     ),
-    risks: safeArray(source.risks, isRisk, 8),
-    questions: safeArray(source.questions, isString, 8),
-    testPlan: safeArray(source.testPlan, isTest, 10),
+    risks: safeArray(optionalArray(source.risks), isRisk, 8),
+    questions: safeArray(optionalArray(source.questions), isString, 8),
+    testPlan: safeArray(optionalArray(source.testPlan), isTest, 10),
   };
 }
 
-function extractJson(content: string): unknown {
-  const cleaned = content
-    .replace(/^```(?:json)?\s*/i, "")
-    .replace(/\s*```$/i, "")
-    .trim();
+function tryParseJson(candidate: string): unknown | undefined {
   try {
-    return JSON.parse(cleaned);
+    return JSON.parse(candidate);
   } catch {
-    const first = cleaned.indexOf("{");
-    const last = cleaned.lastIndexOf("}");
-    if (first >= 0 && last > first) {
-      try {
-        return JSON.parse(cleaned.slice(first, last + 1));
-      } catch {
-        return null;
+    return undefined;
+  }
+}
+
+function findFirstJsonValue(content: string): unknown | undefined {
+  for (let start = 0; start < content.length; start += 1) {
+    const opening = content[start];
+    if (opening !== "{") continue;
+
+    const stack: string[] = [];
+    let inString = false;
+    let escaped = false;
+    for (let index = start; index < content.length; index += 1) {
+      const character = content[index];
+      if (inString) {
+        if (escaped) {
+          escaped = false;
+        } else if (character === "\\") {
+          escaped = true;
+        } else if (character === '"') {
+          inString = false;
+        }
+        continue;
+      }
+      if (character === '"') {
+        inString = true;
+      } else if (character === "{" || character === "[") {
+        stack.push(character);
+      } else if (character === "}" || character === "]") {
+        const expected = character === "}" ? "{" : "[";
+        if (stack.pop() !== expected) break;
+        if (stack.length === 0) {
+          const parsed = tryParseJson(content.slice(start, index + 1));
+          if (
+            isRecord(parsed) &&
+            ("summary" in parsed || "difficulty" in parsed)
+          ) {
+            return parsed;
+          }
+          break;
+        }
       }
     }
-    return null;
   }
+  return undefined;
+}
+
+export function extractJson(content: string): unknown {
+  const trimmed = content.trim();
+  const direct = tryParseJson(trimmed);
+  if (direct !== undefined) return direct;
+
+  const fencedBlocks = trimmed.matchAll(/```(?:json)?\s*([\s\S]*?)```/gi);
+  for (const match of fencedBlocks) {
+    const parsed = tryParseJson(match[1].trim());
+    if (parsed !== undefined) return parsed;
+  }
+
+  const embedded = findFirstJsonValue(trimmed);
+  if (embedded !== undefined) return embedded;
+  throw new Error("Hy3 返回的内容不是合法 JSON，请重试。");
+}
+
+function sanitizeUpstreamMessage(message: string, apiKey: string): string {
+  let sanitized = message;
+  if (apiKey) {
+    sanitized = sanitized.split(apiKey).join("[已脱敏]");
+  }
+  return sanitized
+    .replace(
+      /\b(?:Bearer\s+)?(?:sk-|gh[pousr]_|github_pat_)[A-Za-z0-9_-]{8,}\b/gi,
+      "[已脱敏]",
+    )
+    .replace(/authorization\s*[:=]\s*[^\s,;]+/gi, "Authorization: [已脱敏]");
 }
 
 function buildPrompt(
@@ -142,7 +215,7 @@ function buildPrompt(
     .map((entry) => `${entry.type === "dir" ? "目录" : "文件"}: ${entry.path}`)
     .join("\n");
 
-  return `你是 IssuePilot，一名严谨的开源贡献规划助手。请仅根据下方证据分析任务，不要虚构不存在的文件、接口或项目规则。
+  return `你是 Issue-killer，一名严谨的开源贡献规划助手。请仅根据下方证据分析任务，不要虚构不存在的文件、接口或项目规则。
 
 目标：把公开 GitHub Issue 转换成可执行、可验证的贡献计划。
 
@@ -215,7 +288,7 @@ export async function analyzeWithHy3(options: {
   const model = process.env.HY3_MODEL || "hy3";
   const prompt = buildPrompt(options.parsed, options.context);
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 90_000);
+  const timer = setTimeout(() => controller.abort(), 30_000);
 
   try {
     const response = await fetch(`${baseUrl}/chat/completions`, {
@@ -235,7 +308,7 @@ export async function analyzeWithHy3(options: {
           { role: "user", content: prompt },
         ],
         temperature: 0.2,
-        max_tokens: 4_000,
+        max_tokens: 6_000,
         stream: false,
       }),
       signal: controller.signal,
@@ -253,18 +326,20 @@ export async function analyzeWithHy3(options: {
       }
       throw new Error(
         upstreamMessage
-          ? `Hy3 调用失败：${upstreamMessage.slice(0, 180)}`
+          ? `Hy3 调用失败：${sanitizeUpstreamMessage(upstreamMessage, options.apiKey).slice(0, 180)}`
           : `Hy3 调用失败（${response.status}）。`,
       );
     }
 
-    const content = payload.choices?.[0]?.message?.content?.trim() || "";
+    const message = payload.choices?.[0]?.message;
+    const content =
+      message?.content?.trim() || message?.reasoning_content?.trim() || "";
     if (!content) {
       throw new Error("Hy3 没有返回可用的分析内容。");
     }
 
     return {
-      analysis: normalizeModelOutput(extractJson(content), content),
+      analysis: normalizeModelOutput(extractJson(content)),
       usage: payload.usage,
     };
   } catch (error) {
