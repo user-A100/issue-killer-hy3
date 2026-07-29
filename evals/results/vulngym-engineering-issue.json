@@ -1,0 +1,194 @@
+{
+  "case": {
+    "id": "vulngym-engineering-issue",
+    "name": "VulnGym trace 清理任务",
+    "url": "https://github.com/Tencent/VulnGym/issues/5"
+  },
+  "verdict": "PASS",
+  "checks": [
+    {
+      "name": "项目标题",
+      "pass": true,
+      "detail": "应包含 VulnGym"
+    },
+    {
+      "name": "acceptanceCriteria 数量",
+      "pass": true,
+      "detail": "6 / 最少 4"
+    },
+    {
+      "name": "implementationPlan 数量",
+      "pass": true,
+      "detail": "6 / 最少 3"
+    },
+    {
+      "name": "risks 数量",
+      "pass": true,
+      "detail": "3 / 最少 1"
+    },
+    {
+      "name": "testPlan 数量",
+      "pass": true,
+      "detail": "5 / 最少 3"
+    },
+    {
+      "name": "sources 数量",
+      "pass": true,
+      "detail": "3 / 最少 2"
+    },
+    {
+      "name": "关键概念覆盖",
+      "pass": true,
+      "detail": "trace、跨文件、区间、保守、日志"
+    },
+    {
+      "name": "证据内入口",
+      "pass": true,
+      "detail": "3 个入口"
+    }
+  ],
+  "result": {
+    "project": {
+      "owner": "Tencent",
+      "repo": "VulnGym",
+      "number": 5,
+      "title": "【2026犀牛鸟】清理 VulnGym 调用链顺序异常和重复节点",
+      "state": "open",
+      "labels": [
+        "腾讯犀牛鸟开源专属",
+        "犀牛鸟-低难度"
+      ],
+      "url": "https://github.com/Tencent/VulnGym/issues/5"
+    },
+    "summary": "本任务要求为 Tencent/VulnGym 编写一个 Python 脚本，读取 data/entries.jsonl，检测并清理 trace 调用链中的重复节点与同一文件内的顺序异常（节点行号早于 entry_point 或晚于 critical_operation）。需支持整数与 'start-end' 行号格式，跨文件节点保留原序不重排，提供保守与修复两种模式，并输出修复后 JSONL、修改日志、检测报告与 README。验收强调可扫描全量数据、正确处理行号、稳定检测越界、不误排跨文件、日志含 entry_id 等字段、修复文件满足 SCHEMA.md 约束。",
+    "difficulty": {
+      "level": "低",
+      "rationale": "Issue 标签为'犀牛鸟-低难度'，任务目标与交付物明确，仅需编写独立脚本处理本地 JSONL 数据，不修改仓库核心逻辑，无复杂系统依赖。"
+    },
+    "acceptanceCriteria": [
+      "脚本能完整扫描 data/entries.jsonl 并输出结构异常报告（含重复节点、顺序异常、自动修复、人工复核数量统计）",
+      "脚本能正确解析并处理 line 为整数及 'start-end' 字符串两种格式",
+      "对同一文件内 trace 节点行号小于 entry_point.line 或大于 critical_operation.line 的情况能稳定检测",
+      "对跨文件 trace 节点不做基于行号的错误排序，并记录为'跨文件，不参与行号比较'",
+      "所有修改日志包含 entry_id、字段路径、修改前后内容和修改原因",
+      "修复后输出的 JSONL 文件仍满足 SCHEMA.md 中定义的基础字段约束（可通过读取 SCHEMA.md 校验关键字段存在性）"
+    ],
+    "entryPoints": [
+      {
+        "path": "data/entries.jsonl",
+        "why": "Issue 指定输入文件，需了解 trace、entry_point、critical_operation 实际结构与行号格式"
+      },
+      {
+        "path": "SCHEMA.md",
+        "why": "验收标准第6条要求修复后数据满足其基础约束，需确认字段定义与校验不变量"
+      },
+      {
+        "path": "README.md",
+        "why": "仓库布局与数据说明中明确了 entries.jsonl 的字段含义及 verify 字段用法，辅助理解样本"
+      }
+    ],
+    "implementationPlan": [
+      {
+        "title": "阅读数据与模式定义",
+        "detail": "读取 data/entries.jsonl 与 SCHEMA.md，确认 entry_point、critical_operation、trace 节点字段（file、line、code、desc）及行号格式",
+        "verification": "能列举出 trace 节点字段结构及 line 的两种格式示例"
+      },
+      {
+        "title": "实现行号解析工具",
+        "detail": "编写函数统一解析整数与 'start-end' 字符串，返回可比较的区间或点",
+        "verification": "单元测试覆盖整数、'start-end'、边界字符串解析正确"
+      },
+      {
+        "title": "实现重复节点检测",
+        "detail": "按 {file,line,code} 完全相同判定重复，保留首次出现，检查 desc 同步",
+        "verification": "对构造的重复样本能输出重复候选及位置"
+      },
+      {
+        "title": "实现同文件顺序异常检测",
+        "detail": "比较同文件 trace 节点行号与 entry_point.line、critical_operation.line，跨文件标记跳过",
+        "verification": "对 entry-00103 等优先样本能检出早于入口或晚于关键操作"
+      },
+      {
+        "title": "实现保守/修复双模式",
+        "detail": "保守模式仅记录；修复模式删除越界节点并写日志",
+        "verification": "两种模式运行后分别产生仅报告与含修复文件+日志的输出"
+      },
+      {
+        "title": "输出交付物",
+        "detail": "生成 entries.trace_fixed.jsonl、trace_fix_log.csv/json、检测报告、README",
+        "verification": "所有交付物文件存在且日志含要求的字段"
+      }
+    ],
+    "risks": [
+      {
+        "level": "中",
+        "risk": "SCHEMA.md 具体约束未在本证据中展开，修复后可能遗漏隐藏校验",
+        "mitigation": "实现后对照 SCHEMA.md 逐字段校验输出文件，补充问题向维护者确认"
+      },
+      {
+        "level": "低",
+        "risk": "区间行号与单点比较逻辑边界易错（如 start-end 跨过边界）",
+        "mitigation": "明确区间比较规则并写单元测试覆盖"
+      },
+      {
+        "level": "低",
+        "risk": "人工复核样本（如 entry-00185）自动处理可能误删",
+        "mitigation": "默认保守模式，修复模式对疑似需复核的标记为人工复核不自动改"
+      }
+    ],
+    "questions": [
+      "SCHEMA.md 中对 trace 节点及修复后文件的具体基础约束有哪些需要机器校验？",
+      "entry_point 或 critical_operation 本身出现在 trace 中时，是否参与重复或顺序判定？",
+      "修复模式下'明显越界'是否包含区间行号部分越界，还是仅完全越界才删？",
+      "修改日志 CSV 与 JSON 是否均需提供，还是任选其一即可？"
+    ],
+    "testPlan": [
+      {
+        "scenario": "正常流程：读取全量 data/entries.jsonl 并跑保守模式",
+        "expected": "生成异常报告，不修改数据，日志仅记录"
+      },
+      {
+        "scenario": "边界条件：line 为 '10-20' 且 entry_point.line=15",
+        "expected": "区间节点不被视为早于入口；比较逻辑不报错"
+      },
+      {
+        "scenario": "失败路径：输入文件缺失或某行 JSON 解析失败",
+        "expected": "脚本报错并指明出错行号，不生成残缺输出"
+      },
+      {
+        "scenario": "跨文件节点：trace 含不同 file 的节点且行号乱序",
+        "expected": "保留原始顺序，报告标记跨文件不参与行号比较"
+      },
+      {
+        "scenario": "重复节点：同文件同行同 code 出现两次",
+        "expected": "检测为重复，修复模式保留首次并记日志"
+      }
+    ],
+    "sources": [
+      {
+        "label": "Tencent/VulnGym #5",
+        "url": "https://github.com/Tencent/VulnGym/issues/5",
+        "kind": "issue"
+      },
+      {
+        "label": "Tencent/VulnGym 仓库",
+        "url": "https://github.com/Tencent/VulnGym",
+        "kind": "repository"
+      },
+      {
+        "label": "README",
+        "url": "https://github.com/Tencent/VulnGym/blob/main/README.md",
+        "kind": "readme"
+      }
+    ],
+    "meta": {
+      "model": "hy3",
+      "elapsedMs": 21107,
+      "promptTokens": 5128,
+      "completionTokens": 1320,
+      "generatedAt": "2026-07-29T05:58:36.335Z"
+    }
+  },
+  "evaluatedAt": "2026-07-29T05:58:36.338Z",
+  "wallTimeMs": 21127
+}

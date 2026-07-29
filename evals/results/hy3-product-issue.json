@@ -1,0 +1,185 @@
+{
+  "case": {
+    "id": "hy3-product-issue",
+    "name": "Hy3 端到端应用任务",
+    "url": "https://github.com/Tencent-Hunyuan/Hy3/issues/4"
+  },
+  "verdict": "PASS",
+  "checks": [
+    {
+      "name": "项目标题",
+      "pass": true,
+      "detail": "应包含 Hy3"
+    },
+    {
+      "name": "acceptanceCriteria 数量",
+      "pass": true,
+      "detail": "6 / 最少 4"
+    },
+    {
+      "name": "implementationPlan 数量",
+      "pass": true,
+      "detail": "5 / 最少 3"
+    },
+    {
+      "name": "risks 数量",
+      "pass": true,
+      "detail": "3 / 最少 1"
+    },
+    {
+      "name": "testPlan 数量",
+      "pass": true,
+      "detail": "5 / 最少 3"
+    },
+    {
+      "name": "sources 数量",
+      "pass": true,
+      "detail": "3 / 最少 2"
+    },
+    {
+      "name": "关键概念覆盖",
+      "pass": true,
+      "detail": "API、前端、GIF、开源"
+    },
+    {
+      "name": "证据内入口",
+      "pass": true,
+      "detail": "2 个入口"
+    }
+  ],
+  "result": {
+    "project": {
+      "owner": "Tencent-Hunyuan",
+      "repo": "Hy3",
+      "number": 4,
+      "title": "【犀牛鸟实战issue】Build a vibe-coded application powered by Hy3",
+      "state": "open",
+      "labels": [
+        "腾讯犀牛鸟开源专属",
+        "犀牛鸟-中高难度"
+      ],
+      "url": "https://github.com/Tencent-Hunyuan/Hy3/issues/4"
+    },
+    "summary": "本 Issue 为腾讯犀牛鸟 2026 开源活动专属任务，要求参与者基于 Hy3 模型 API（通过 CodeBuddy/WorkBuddy 调用，禁止训练或本地部署），在 rhinobird2026 分支上开发一个端到端可运行的应用，展示 Hy3 在具体场景的能力。应用需含至少 1 个可交互前端（Web/CLI/IDE 插件），跑通至少 2 个端到端 demo 并附≤2 分钟视频或 GIF，README 须说明 Hy3 角色及协作代码记录。产出可独立仓库但需在 PR 中补充说明。仓库根目录仅含 README、LICENSE、.gitignore 及 finetune/rl/assets 目录，无具体 API 文档或应用模板。",
+    "difficulty": {
+      "level": "中",
+      "rationale": "Issue 给出明确产出要求与参考方向，但选题自由、无既有代码约束；需自行设计应用并集成外部 API，对中高难度开发者可行，故判为中。"
+    },
+    "acceptanceCriteria": [
+      "向 rhinobird2026 分支提交 PR 或在 PR 中提供独立应用仓库链接与说明",
+      "应用全程通过 Hy3 API 调用，无训练/微调/本地推理部署",
+      "应用至少包含 1 个可交互前端（Web/CLI/IDE 插件）",
+      "至少跑通 2 个端到端 demo 流程并附 ≤2 分钟视频或 GIF",
+      "项目开源且 README 写明 Hy3 在系统中承担的角色",
+      "README 鼓励记录由 CodeBuddy 协作完成的代码块（非强制，但建议）"
+    ],
+    "entryPoints": [
+      {
+        "path": "README.md",
+        "why": "阅读以了解 Hy3 模型定位、API 调用示例（OpenAI 兼容）与部署方式，为应用集成提供依据"
+      },
+      {
+        "path": "README_CN.md",
+        "why": "阅读中文说明，确认与英文 README 一致的快速入门与限制信息"
+      }
+    ],
+    "implementationPlan": [
+      {
+        "title": "选题与方案设计",
+        "detail": "从 Issue 参考方向或自拟场景选定应用主题，明确 Hy3 承担角色与前端形态",
+        "verification": "输出设计方案文档，含场景、前端类型、2 个 demo 流程描述"
+      },
+      {
+        "title": "获取并调用 Hy3 API",
+        "detail": "依据 README Quickstart 使用 OpenAI 兼容客户端调用 Hy3，不做本地部署",
+        "verification": "代码中存在对 base_url 的 API 调用且能返回 chat completion"
+      },
+      {
+        "title": "实现可交互前端",
+        "detail": "构建 Web/CLI/IDE 插件前端，接收用户输入并展示 Hy3 输出",
+        "verification": "前端可启动并至少完成一次用户输入到输出的交互"
+      },
+      {
+        "title": "端到端 demo 与录制",
+        "detail": "实现并跑通 2 个端到端流程，录制 ≤2 分钟视频或 GIF",
+        "verification": "仓库或 PR 中包含 2 个 demo 的视频/GIF 文件及运行说明"
+      },
+      {
+        "title": "编写 README 与提交 PR",
+        "detail": "在 README 写明 Hy3 角色、API 使用方式、CodeBuddy 协作记录；向 rhinobird2026 提 PR",
+        "verification": "PR 指向 rhinobird2026 分支且 README 包含要求内容"
+      }
+    ],
+    "risks": [
+      {
+        "level": "中",
+        "risk": "Hy3 API 访问权限或地址未明确（README 仅示例本地部署后调用）",
+        "mitigation": "向维护者确认活动专用 API 端点与密钥获取方式"
+      },
+      {
+        "level": "低",
+        "risk": "选题过于宽泛导致验收偏差",
+        "mitigation": "在方案中固化 2 个 demo 流程并对照 Issue 要求自检"
+      },
+      {
+        "level": "中",
+        "risk": "rhinobird2026 分支保护规则或 PR 模板未知",
+        "mitigation": "提前查看分支与仓库 CONTRIBUTING（当前未找到），必要时提问"
+      }
+    ],
+    "questions": [
+      "活动是否提供 Hy3 的云端 API 端点与访问密钥？还是必须使用自部署 vLLM/SGLang？",
+      "rhinobird2026 分支的 PR 提交是否有特定模板或 CI 检查要求？",
+      "独立应用仓库是否必须纳入 Tencent-Hunyuan 组织，还是个人账号即可？",
+      "demo 视频/GIF 应放在 PR 内还是外部链接可接受？"
+    ],
+    "testPlan": [
+      {
+        "scenario": "正常流程：用户通过前端输入查询，系统调用 Hy3 并返回结果",
+        "expected": "前端展示 Hy3 生成内容，无报错，API 调用成功"
+      },
+      {
+        "scenario": "边界条件：用户输入超长文本（接近 256K 上下文）",
+        "expected": "系统正常处理或给出明确长度限制提示，不崩溃"
+      },
+      {
+        "scenario": "边界条件：连续多轮对话跟踪意图",
+        "expected": "Hy3 基于历史保持上下文，输出符合多轮约束"
+      },
+      {
+        "scenario": "失败路径：Hy3 API 不可用或返回错误",
+        "expected": "前端捕获异常并展示友好错误，不出现未处理崩溃"
+      },
+      {
+        "scenario": "失败路径：前端传入空输入",
+        "expected": "系统拒绝处理并提示输入不能为空"
+      }
+    ],
+    "sources": [
+      {
+        "label": "Tencent-Hunyuan/Hy3 #4",
+        "url": "https://github.com/Tencent-Hunyuan/Hy3/issues/4",
+        "kind": "issue"
+      },
+      {
+        "label": "Tencent-Hunyuan/Hy3 仓库",
+        "url": "https://github.com/Tencent-Hunyuan/Hy3",
+        "kind": "repository"
+      },
+      {
+        "label": "README",
+        "url": "https://github.com/Tencent-Hunyuan/Hy3/blob/main/README.md",
+        "kind": "readme"
+      }
+    ],
+    "meta": {
+      "model": "hy3",
+      "elapsedMs": 21361,
+      "promptTokens": 3893,
+      "completionTokens": 1203,
+      "generatedAt": "2026-07-29T05:58:15.204Z"
+    }
+  },
+  "evaluatedAt": "2026-07-29T05:58:15.209Z",
+  "wallTimeMs": 21428
+}

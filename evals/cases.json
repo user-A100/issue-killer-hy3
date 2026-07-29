@@ -1,0 +1,30 @@
+[
+  {
+    "id": "hy3-product-issue",
+    "name": "Hy3 端到端应用任务",
+    "url": "https://github.com/Tencent-Hunyuan/Hy3/issues/4",
+    "expectedTitleIncludes": "Hy3",
+    "minimums": {
+      "acceptanceCriteria": 4,
+      "implementationPlan": 3,
+      "risks": 1,
+      "testPlan": 3,
+      "sources": 2
+    },
+    "mustMentionAny": ["API", "前端", "Demo", "GIF", "开源"]
+  },
+  {
+    "id": "vulngym-engineering-issue",
+    "name": "VulnGym trace 清理任务",
+    "url": "https://github.com/Tencent/VulnGym/issues/5",
+    "expectedTitleIncludes": "VulnGym",
+    "minimums": {
+      "acceptanceCriteria": 4,
+      "implementationPlan": 3,
+      "risks": 1,
+      "testPlan": 3,
+      "sources": 2
+    },
+    "mustMentionAny": ["trace", "跨文件", "区间", "保守", "日志"]
+  }
+]
